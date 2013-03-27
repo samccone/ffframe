@@ -6,7 +6,7 @@ exports.connect = function(cb) {
       console.log("º Error Connecting", JSON.stringify(err));
     } else {
       console.log("º DB Connected");
-      setSchemas()
+      setSchemas();
     }
   });
 }
@@ -18,7 +18,9 @@ function setSchemas() {
     caption: String
   });
 
-  var frame = mongoose.model('frame', frameSchema);
+  global.models = {
+    frame: mongoose.model('frame', frameSchema)
+  };
 }
 
 exports.inser
