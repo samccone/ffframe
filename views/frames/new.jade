@@ -1,9 +1,12 @@
-h1 New Frame
-form(method="post", enctype="multipart/form-data", action="/frames/new")
-  input(type='file', name="image", id="image")
-  br/
-  input(type="text", name='title', placeholder="image title", id="title")
-  br/
-  textarea(rows="10", cols="40", name="caption", id="caption")
-  br/
-  input(type="submit")
+extends ../layout/layout
+
+block body
+  h1 New Frame
+  form(method="post", enctype="multipart/form-data", action="/frames/new")
+    input(type='file', name="image", id="image")
+    br/
+    input(type="text", name='title', placeholder="image title", id="title")
+    br/
+    textarea(rows="10", cols="40", name="caption", id="caption")
+    br/
+    input(type="submit")
