@@ -1,5 +1,3 @@
-var validator = require('validator');
-
 module.exports = function(server) {
   server.get("/", function(req, res) {
     res.render('home');
@@ -11,7 +9,11 @@ module.exports = function(server) {
 
   server.post('/frames/new', function(req, res) {
     req.check('title', 'frame requires a title').notEmpty();
-    req.sanatize('caption').xss();
-    res.redirect('/');
+
+    if (req.validationErrors()) {
+      res.render('frames/new', {errors: req.validationErrors()});
+    } else {
+      res.redirect('/');
+    }
   });
 }
