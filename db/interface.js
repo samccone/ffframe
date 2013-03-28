@@ -18,8 +18,13 @@ function setSchemas() {
     caption: String
   });
 
+  var userSchema = mongoose.Schema({
+    email: String
+  });
+
   global.models = {
-    frame: mongoose.model('frame', frameSchema)
+    frame: mongoose.model('frame', frameSchema),
+    User: mongoose.model('user', userSchema)
   };
 }
 

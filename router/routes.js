@@ -1,5 +1,5 @@
-module.exports = function(server) {
-  server.get("/", function(req, res) {
+module.exports = function(server, passport) {
+  server.get("/", loggedIn, function(req, res) {
     global.models.frame.find({}, function(err, d) {
       if (err) {
         res.render('home', {
@@ -13,11 +13,21 @@ module.exports = function(server) {
     });
   });
 
-  server.get("/frames/new", function(req, res) {
+  server.get('/auth/google', passport.authenticate('google'));
+
+  server.get('/auth/google/return', passport.authenticate('google', {failureRedirect: '/login'}), function(req, res) {
+    res.redirect('/');
+  });
+
+  server.get('/login', function(req, res) {
+    res.render('login/login');
+  });
+
+  server.get("/frames/new", loggedIn, function(req, res) {
     res.render('frames/new');
   });
 
-  server.post('/frames/new', function(req, res) {
+  server.post('/frames/new', loggedIn, function(req, res) {
     req.check('title', 'frame requires a title').notEmpty();
 
     if (req.validationErrors()) {
@@ -38,4 +48,13 @@ module.exports = function(server) {
       });
     }
   });
+}
+
+
+function loggedIn(req, res, done) {
+  if (req.user) {
+    done();
+  } else {
+    res.redirect('/login');
+  }
 }
