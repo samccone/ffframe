@@ -38,7 +38,7 @@ module.exports = function(server, passport) {
       controllers.Frames.create({
         title: req.body.title,
         caption: req.body.caption,
-        url: 'http://placehold.it/100x100'
+        upload: req.files.image
       }, function(err, obj) {
         if (err) {
           res.render('frames/new', {errors: err});
