@@ -61,6 +61,10 @@ module.exports = function(server, passport) {
       });
     }
   });
+
+  server.post('/comments/new', function(req, res) {
+    res.redirect('/frames/'+req.body.frameID);
+  });
 }
 
 function loggedIn(req, res, done) {

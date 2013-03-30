@@ -5,3 +5,12 @@ block body
   img(src=data.url, height="400px")
   p= data.caption
   p= data._user.name
+  hr/
+  #comments
+    h2 Comments
+    form(action="/comments/new", method="POST", enctype="multipart/form-data")
+      textarea(name="comment", rows="10", cols="50")
+      input(type="text", hidden="hidden", value=data._id, name="frameID")
+      br/
+      input(type="submit")
+
