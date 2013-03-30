@@ -29,6 +29,16 @@ module.exports = function(server, passport) {
     res.render('frames/new');
   });
 
+  server.get("/frames/:id", loggedIn, function(req, res) {
+    controllers.Frames.find({_id: req.params.id}, function(err, d) {
+      if (err) {
+        res.render('home', {errors: err});
+      } else {
+        res.render('frames/show', {data: d});
+      }
+    });
+  });
+
   server.post('/frames/new', loggedIn, function(req, res) {
     req.check('title', 'frame requires a title').notEmpty();
 
