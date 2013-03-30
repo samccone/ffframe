@@ -3,7 +3,6 @@ module.exports = {
   create: create
 };
 
-
 function find(query, cb) {
   global.models.User.find(query, cb);
 }

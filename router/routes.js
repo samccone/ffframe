@@ -30,7 +30,9 @@ module.exports = function(server, passport) {
   });
 
   server.get("/frames/:id", loggedIn, function(req, res) {
-    controllers.Frames.find({_id: req.params.id}, function(err, d) {
+    global.models.frame.findOne({_id: req.params.id})
+    .populate('_user')
+    .exec(function(err, d) {
       if (err) {
         res.render('home', {errors: err});
       } else {
@@ -48,7 +50,8 @@ module.exports = function(server, passport) {
       controllers.Frames.create({
         title: req.body.title,
         caption: req.body.caption,
-        upload: req.files.image
+        upload: req.files.image,
+        _user: req.user
       }, function(err, obj) {
         if (err) {
           res.render('frames/new', {errors: err});

@@ -17,7 +17,7 @@ function setSchemas() {
     title: String,
     url: String,
     caption: String,
-    user: Number,
+    _user: {type: mongoose.Schema.ObjectId, ref: 'user'},
     date: {type: Date, default: Date.now}
   });
 

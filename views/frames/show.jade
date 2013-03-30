@@ -1,6 +1,7 @@
 extends ../layout/layout
 
 block body
-  h2= data[0].title
-  img(src=data[0].url, height="400px")
-  p= data[0].caption
+  h2= data.title
+  img(src=data.url, height="400px")
+  p= data.caption
+  p= data._user.name
