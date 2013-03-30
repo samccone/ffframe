@@ -1,11 +1,12 @@
 var mongoose = require('mongoose');
+var colors   = require('colors');
 
 exports.connect = function(cb) {
   mongoose.connect(process.env['db'] || 'mongodb://localhost/db', function(err, d) {
     if (err) {
-      console.log("º Error Connecting", JSON.stringify(err));
+      console.log("º Error Connecting".red, JSON.stringify(err));
     } else {
-      console.log("º DB Connected");
+      console.log("º DB Connected".green);
       setSchemas();
     }
   });
@@ -15,11 +16,15 @@ function setSchemas() {
   var frameSchema = mongoose.Schema({
     title: String,
     url: String,
-    caption: String
+    caption: String,
+    user: Number,
+    date: {type: Date, default: Date.now}
   });
 
   var userSchema = mongoose.Schema({
-    email: String
+    email: String,
+    name: String,
+    createdAt: {type: Date, default: Date.now}
   });
 
   global.models = {
@@ -27,5 +32,3 @@ function setSchemas() {
     User: mongoose.model('user', userSchema)
   };
 }
-
-exports.inser

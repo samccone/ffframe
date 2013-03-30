@@ -1,4 +1,5 @@
-var GoogleStrategy    = require('passport-google').Strategy;
+var GoogleStrategy  = require('passport-google').Strategy;
+var controllers     = require('../../controllers/controllers')
 
 module.exports = function(passport) {
   passport.use(new GoogleStrategy({
@@ -11,20 +12,19 @@ module.exports = function(passport) {
 
 
   passport.serializeUser(function(user, done) {
-    done(null, user.emails[0].value);
+    done(null, user);
   });
 
-  passport.deserializeUser(function(email, done) {
-    global.models.User.find({email: email}, function(err, data) {
+  passport.deserializeUser(function(user, done) {
+    controllers.Users.find({email: user.emails[0].value}, function(err, data) {
       if (err) {
         done(err, null);
       } else {
         if (data.length == 0) {
-          var usr = new global.models.User({
-            email: email
-          });
-          console.log("ø Creating a New User "+email);
-          usr.save(done);
+          controllers.Users.create({
+            name: user.displayName,
+            email: user.emails[0].value
+          }, done);
         } else {
           done(null, data[0]);
         }

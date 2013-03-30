@@ -1,6 +1,8 @@
+var controllers = require('../controllers/controllers');
+
 module.exports = function(server, passport) {
   server.get("/", loggedIn, function(req, res) {
-    global.models.frame.find({}, function(err, d) {
+    controllers.Frames.find({}, function(err, d) {
       if (err) {
         res.render('home', {
           errors: err
@@ -33,13 +35,11 @@ module.exports = function(server, passport) {
     if (req.validationErrors()) {
       res.render('frames/new', {errors: req.validationErrors()});
     } else {
-      var frame = new global.models.frame({
+      controllers.Frames.create({
         title: req.body.title,
         caption: req.body.caption,
         url: 'http://placehold.it/100x100'
-      });
-
-      frame.save(function(err, model) {
+      }, function(err, obj) {
         if (err) {
           res.render('frames/new', {errors: err});
         } else {
@@ -49,7 +49,6 @@ module.exports = function(server, passport) {
     }
   });
 }
-
 
 function loggedIn(req, res, done) {
   if (req.user) {
