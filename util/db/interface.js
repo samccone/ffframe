@@ -27,8 +27,16 @@ function setSchemas() {
     createdAt: {type: Date, default: Date.now}
   });
 
+  var commentSchema = mongoose.Schema({
+    text: String,
+    createdAt: {type: Date, default: Date.now},
+    _user: {type: mongoose.Schema.ObjectId, ref: 'user'},
+    _frame: {type: mongoose.Schema.ObjectId, ref: 'frame'}
+  });
+
   global.models = {
     frame: mongoose.model('frame', frameSchema),
-    User: mongoose.model('user', userSchema)
+    User: mongoose.model('user', userSchema),
+    Comment: mongoose.model('comment', commentSchema)
   };
 }
