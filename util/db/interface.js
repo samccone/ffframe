@@ -17,21 +17,22 @@ function setSchemas() {
     title: String,
     url: String,
     caption: String,
-    _user: {type: mongoose.Schema.ObjectId, ref: 'user'},
+    _user: {type: mongoose.Schema.Types.ObjectId, ref: 'user'},
     date: {type: Date, default: Date.now}
   });
 
   var userSchema = mongoose.Schema({
     email: String,
     name: String,
+    comments: [{type: mongoose.Schema.Types.ObjectId, ref: 'comment'}],
     createdAt: {type: Date, default: Date.now}
   });
 
   var commentSchema = mongoose.Schema({
     text: String,
     createdAt: {type: Date, default: Date.now},
-    _user: {type: mongoose.Schema.ObjectId, ref: 'user'},
-    _frame: {type: mongoose.Schema.ObjectId, ref: 'frame'}
+    _user: {type: mongoose.Schema.Types.ObjectId, ref: 'user'},
+    _frame: {type: mongoose.Schema.Types.ObjectId, ref: 'frame'}
   });
 
   global.models = {

@@ -8,6 +8,13 @@ block body
   hr/
   #comments
     h2 Comments
+
+    ul#comment-list
+      - comments.forEach(function(c){
+        li.comment
+          h6= c._user.name
+          p= c.text
+      - });
     form(action="/comments/new", method="POST", enctype="multipart/form-data")
       textarea(name="comment", rows="10", cols="50")
       input(type="text", hidden="hidden", value=data._id, name="frameID")

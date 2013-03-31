@@ -1,4 +1,6 @@
 var controllers = require('../controllers/controllers');
+var _           = require('underscore');
+var sanitize    = require('validator').sanitize;
 
 module.exports = function(server, passport) {
   server.get("/", loggedIn, function(req, res) {
@@ -30,13 +32,19 @@ module.exports = function(server, passport) {
   });
 
   server.get("/frames/:id", loggedIn, function(req, res) {
-    global.models.frame.findOne({_id: req.params.id})
-    .populate('_user')
-    .exec(function(err, d) {
+    controllers.Comments.findByFrameID(req.params.id, function(err, comments) {
       if (err) {
         res.render('home', {errors: err});
       } else {
-        res.render('frames/show', {data: d});
+        global.models.frame.findOne({_id: req.params.id})
+        .populate('_user')
+        .exec(function(err, d) {
+          if (err) {
+            res.render('home', {errors: err});
+          } else {
+            res.render('frames/show', {data: d, comments: comments});
+          }
+        });
       }
     });
   });
@@ -63,7 +71,23 @@ module.exports = function(server, passport) {
   });
 
   server.post('/comments/new', function(req, res) {
-    res.redirect('/frames/'+req.body.frameID);
+    req.check('comment', "comment can not be blank").notEmpty();
+    if (req.validationErrors()) {
+      res.render('/frames/'+req.body.frameID, {errors: req.validationErrors()});
+    } else {
+      req.sanitize('comment').escape();
+      controllers.Comments.create({
+        text: req.body.comment,
+        _frame: req.body.frameID,
+        _user: req.user
+      }, function(err, model) {
+        if (err) {
+          res.render('/frames/'+req.body.frameID, {errors: err});
+        } else {
+          res.redirect('/frames/'+req.body.frameID);
+        }
+      });
+    }
   });
 }
 
