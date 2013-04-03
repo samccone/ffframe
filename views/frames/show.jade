@@ -2,6 +2,9 @@ extends ../layout/layout
 
 block body
   h2= data.title
+  - if (user.email == data._user.email)
+    a(href="/frames/"+data._id+"/delete") Delete Frame
+  br/
   img(src=data.url, height="400px")
   p= data.caption
   p= data._user.name

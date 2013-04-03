@@ -31,6 +31,28 @@ module.exports = function(server, passport) {
     res.render('frames/new');
   });
 
+  server.get("/frames/:id/delete", loggedIn, function(req, res) {
+    global.models.frame.findOne({_id: req.params.id})
+    .populate('_user')
+    .exec(function(err, d) {
+      if (err) {
+        res.render('/frames/'+req.body.frameID, {errors: err});
+      } else {
+        if (d._user.email == req.user.email) {
+          global.models.frame.remove({_id: req.params.id}, function(err) {
+            if (err) {
+              res.render('/frames/'+req.body.frameID, {errors: err});
+            } else {
+              res.redirect('/');
+            }
+          });
+        } else {
+          res.render('/frames/'+req.body.frameID, {errors: "you can not delete this"});
+        }
+      }
+    });
+  });
+
   server.get("/frames/:id", loggedIn, function(req, res) {
     controllers.Comments.findByFrameID(req.params.id, function(err, comments) {
       if (err) {
