@@ -64,7 +64,11 @@ module.exports = function(server, passport) {
           if (err) {
             res.render('home', {errors: err});
           } else {
-            res.render('frames/show', {data: d, comments: comments});
+            if (d) {
+              res.render('frames/show', {data: d, comments: comments, user: req.user});
+            } else {
+              res.redirect('/');
+            }
           }
         });
       }
@@ -73,9 +77,13 @@ module.exports = function(server, passport) {
 
   server.post('/frames/new', loggedIn, function(req, res) {
     req.check('title', 'frame requires a title').notEmpty();
-
-    if (req.validationErrors()) {
-      res.render('frames/new', {errors: req.validationErrors()});
+    validUpload = isValidUpload(req);
+    if (req.validationErrors() || !validUpload) {
+      if (!validUpload) {
+        res.render('frames/new', {errors: "a valid image is required"});
+      } else {
+        res.render('frames/new', {errors: req.validationErrors()});
+      }
     } else {
       controllers.Frames.create({
         title: req.body.title,
@@ -111,6 +119,11 @@ module.exports = function(server, passport) {
       });
     }
   });
+}
+
+function isValidUpload(req) {
+  var validType = ~["image/png", "image/jpg", "image/jpeg"].indexOf(req.files.image.type);
+  return Boolean(validType);
 }
 
 function loggedIn(req, res, done) {
