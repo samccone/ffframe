@@ -1,4 +1,4 @@
-global.port           = process.env['port'] || 3000;
+var port              = process.env['port'] || 3000;
 var colors            = require('colors');
 var express           = require('express');
 var expressValidator  = require('express-validator');
@@ -7,7 +7,6 @@ var server            = express();
 var db                = require('./util/db/interface').connect();
 var passport          = require('passport');
 var passportConfig    = require('./util/auth/config')(passport);
-
 
 server.configure(function() {
   server.use(express.cookieParser());
@@ -21,7 +20,6 @@ server.configure(function() {
   server.set("view engine", "jade");
   server.use(express.static(__dirname + "/public"));
 });
-
 
 router(server, passport);
 

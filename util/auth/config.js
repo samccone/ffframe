@@ -1,15 +1,16 @@
+var port            = process.env['port'] || 3000;
 var GoogleStrategy  = require('passport-google').Strategy;
 var controllers     = require('../../controllers/controllers')
+var root            = process.env['NODE_ENV'] ? "http://ffframe.jit.su"  : "http://localhost:"+port
 
 module.exports = function(passport) {
   passport.use(new GoogleStrategy({
-    returnURL: "http://localhost:"+global.port+"/auth/google/return",
-    realm: "http://localhost:"+global.port+"/"
+    returnURL: root+"/auth/google/return",
+    realm: root+"/"
     }, function(id, p, done) {
       return done(null, p);
     }
   ));
-
 
   passport.serializeUser(function(user, done) {
     done(null, user);
