@@ -1,43 +1,47 @@
-var mongoose = require('mongoose');
-var colors   = require('colors');
+var Schema    = require('jugglingdb').Schema;
+var db        = null;
+var colors    = require('colors');
 
 exports.connect = function(cb) {
-  mongoose.connect(process.env['db'] || 'mongodb://localhost/db', function(err, d) {
-    if (err) {
-      console.log("º Error Connecting".red, JSON.stringify(err));
-    } else {
-      console.log("º DB Connected".green);
-      setSchemas();
-    }
+  db = new Schema('mongodb', {
+    url: process.env['db'] || 'mongodb://localhost/db'
+  });
+
+  db.on('connected', function() {
+    console.log("º DB Connected".green);
+    setSchemas();
   });
 }
 
 function setSchemas() {
-  var frameSchema = mongoose.Schema({
+  var Frame = db.define("Frame", {
     title: String,
     url: String,
     caption: String,
-    _user: {type: mongoose.Schema.Types.ObjectId, ref: 'user'},
     date: {type: Date, default: Date.now}
   });
 
-  var userSchema = mongoose.Schema({
+  var User = db.define("User", {
     email: String,
     name: String,
-    comments: [{type: mongoose.Schema.Types.ObjectId, ref: 'comment'}],
     createdAt: {type: Date, default: Date.now}
   });
 
-  var commentSchema = mongoose.Schema({
+  var Comment = db.define("Comment", {
     text: String,
-    createdAt: {type: Date, default: Date.now},
-    _user: {type: mongoose.Schema.Types.ObjectId, ref: 'user'},
-    _frame: {type: mongoose.Schema.Types.ObjectId, ref: 'frame'}
+    name: String,
+    createdAt: {type: Date, default: Date.now}
   });
 
+  User.hasMany(Comment, {as: "comments", foreignKey: "userId"});
+  User.hasMany(Frame, {as: "frames", foreignKey: "userId"});
+  Frame.hasMany(Comment, {as: "comments", foreignKey: "frameId"});
+  Frame.belongsTo(User, {as: "author", foreignKey: "userId"});
+
   global.models = {
-    frame: mongoose.model('frame', frameSchema),
-    User: mongoose.model('user', userSchema),
-    Comment: mongoose.model('comment', commentSchema)
+    db: db,
+    Frame: Frame,
+    User: User,
+    Comment: Comment
   };
 }

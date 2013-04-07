@@ -1,5 +1,4 @@
 module.exports = {
-  find: find,
   tokenAuth: tokenAuth,
   create: create,
   enterAuthToken: enterAuthToken
@@ -17,11 +16,9 @@ function tokenAuth(req, res, done) {
   }
 }
 
-function find(query, cb) {
-  global.models.User.find(query, cb);
-}
-
 function create(obj, cb) {
+  console.log("creating new user");
+  console.log(obj);
   var user = new global.models.User(obj);
   user.save(cb);
 }

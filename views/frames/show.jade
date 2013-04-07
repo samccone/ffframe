@@ -2,12 +2,12 @@ extends ../layout/layout
 
 block body
   h2= data.title
-  - if (user.email == data._user.email)
+  - if (user.email == author.email)
     a(href="/frames/"+data._id+"/delete") Delete Frame
   br/
   img(src=data.url, height="400px")
   p= data.caption
-  p= data._user.name
+  p= author.name
   hr/
   #comments
     h2 Comments
@@ -15,7 +15,7 @@ block body
     ul#comment-list
       - comments.forEach(function(c){
         li.comment
-          h6= c._user.name
+          h6= c.name
           p= c.text
       - });
     form(action="/comments/new", method="POST", enctype="multipart/form-data")

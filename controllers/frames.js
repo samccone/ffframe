@@ -1,7 +1,8 @@
 var s3Upload    = require('../util/images/upload_to_s3');
+var async       = require('async');
 
 function getRecent(req, res) {
-  global.models.frame.find({}, function(err, d) {
+  global.models.Frame.all({limit: 10}, function(err, d) {
     if (err) {
       res.render('home', {
         errors: err,
@@ -9,7 +10,7 @@ function getRecent(req, res) {
       });
     } else {
       res.render('home', {
-        frames: d,
+        frames: d.reverse(),
         production: Boolean(process.env['NODE_ENV'])
       });
     }
@@ -17,47 +18,53 @@ function getRecent(req, res) {
 }
 
 function show(req, res) {
-  require('./controllers').Comments.findByFrameID(req.params.id, function(err, comments) {
-    if (err) {
-      res.render('home', {errors: err, production: Boolean(process.env['NODE_ENV'])});
-    } else {
-      global.models.frame.findOne({_id: req.params.id})
-      .populate('_user')
-      .exec(function(err, d) {
-        if (err) {
-          res.render('home', {errors: err, production: Boolean(process.env['NODE_ENV'])});
-        } else {
-          if (d) {
-            res.render('frames/show', {data: d, comments: comments, user: req.user, production: Boolean(process.env['NODE_ENV'])});
-          } else {
-            res.redirect('/');
-          }
-        }
+  async.waterfall([
+    function(cb) {
+      global.models.Frame.find(req.params.id, cb);
+    },
+    function(model, cb) {
+      model.author(function(e, author) {
+        cb(e, model, author);
+      });
+    },
+    function(model, author, cb) {
+      model.comments(function(e, comments) {
+        cb(e, model, author, comments);
       });
     }
+    ], function(err, model, author, comments) {
+      if (err) {
+        res.render('home', {frames: [], errors: err, production: Boolean(process.env['NODE_ENV'])});
+      } else {
+        res.render('frames/show', {data: model, comments: comments, author: author, user: req.user, production: Boolean(process.env['NODE_ENV'])});
+      }
   });
 }
 
 function remove(req, res) {
-  global.models.frame.findOne({_id: req.params.id})
-  .populate('_user')
-  .exec(function(err, d) {
-    if (err) {
-      res.render('/frames/'+req.body.frameID, {errors: err, production: Boolean(process.env['NODE_ENV'])});
-    } else {
-      if (d._user.email == req.user.email) {
-        global.models.frame.remove({_id: req.params.id}, function(err) {
-          if (err) {
-            res.render('/frames/'+req.body.frameID, {errors: err, production: Boolean(process.env['NODE_ENV'])});
-          } else {
-            res.redirect('/');
-          }
-        });
+  async.waterfall([
+    function(cb) {
+      global.models.Frame.find(req.params.id, cb);
+    },
+    function(model, cb) {
+      model.comments(function(e, comments) {
+        cb(e, model, comments);
+      });
+    }],
+    function(e, model, comments, cb) {
+      async.each(comments, function(c, cb) {
+        c.destroy(cb)
+      }, function(err) {
+        if (err) { console.log(err)}
+        model.destroy(cb);
+      });
+      if (e) {
+        res.render('/frames/'+req.body.frameID, {errors: e, production: Boolean(process.env['NODE_ENV'])});
       } else {
-        res.render('/frames/'+req.body.frameID, {errors: "you can not delete this", production: Boolean(process.env['NODE_ENV'])});
+        res.redirect('/');
       }
     }
-  });
+  );
 }
 
 
@@ -76,7 +83,7 @@ function create(req, res) {
       title: req.body.title,
       caption: req.body.caption,
       upload: req.files.image,
-      _user: req.user
+      userId: req.user.id
     }, function(err, obj) {
       if (err) {
         res.render('frames/new', {errors: err, production: Boolean(process.env['NODE_ENV'])});
@@ -87,7 +94,6 @@ function create(req, res) {
   }
 }
 
-
 function uploadToS3(obj, cb) {
   s3Upload({
     path: obj.upload.path,
@@ -97,7 +103,7 @@ function uploadToS3(obj, cb) {
       cb(err, null);
     } else {
       obj.url = d.client._httpMessage.url
-      var frame = new global.models.frame(obj);
+      var frame = new global.models.Frame(obj);
       frame.save(cb)
     }
   });

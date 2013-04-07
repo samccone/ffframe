@@ -2,6 +2,7 @@ var port            = process.env['port'] || 3000;
 var GoogleStrategy  = require('passport-google').Strategy;
 var controllers     = require('../../controllers/controllers')
 var root            = process.env['NODE_ENV'] ? "http://ffframe.jit.su"  : "http://localhost:"+port
+var async           = require('async');
 
 module.exports = function(passport) {
   passport.use(new GoogleStrategy({
@@ -17,17 +18,19 @@ module.exports = function(passport) {
   });
 
   passport.deserializeUser(function(user, done) {
-    controllers.Users.find({email: user.emails[0].value}, function(err, data) {
+    global.models.User.findOne({where: {email: user.emails[0].value}}, function(err, data) {
       if (err) {
+        console.log("error", err);
         done(err, null);
       } else {
-        if (data.length == 0) {
+        if (data == null) {
+          console.log("creating a user");
           controllers.Users.create({
             name: user.displayName,
             email: user.emails[0].value
           }, done);
         } else {
-          done(null, data[0]);
+          done(null, data);
         }
       }
     });

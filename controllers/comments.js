@@ -1,13 +1,4 @@
-var mongoose    = require('mongoose');
 var sanitize    = require('validator').sanitize;
-
-function findByFrameID(id, cb) {
-  global.models.Comment.find({
-    _frame: mongoose.Types.ObjectId(id)
-  })
-  .populate('_user')
-  .exec(cb);
-}
 
 function create(req, res) {
   req.check('comment', "comment can not be blank").notEmpty();
@@ -18,8 +9,9 @@ function create(req, res) {
   } else {
     var comment = new global.models.Comment({
       text: req.body.comment,
-      _frame: req.body.frameID,
-      _user: req.user
+      name: req.user.name,
+      frameId: new global.models.db.ObjectID(req.body.frameID),
+      userId: req.user.id
     });
 
     comment.save(function(err, model) {
@@ -33,6 +25,5 @@ function create(req, res) {
 }
 
 module.exports = {
-  findByFrameID: findByFrameID,
   create: create
 };
