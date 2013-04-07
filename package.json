@@ -1,13 +1,13 @@
 {
   "name": "ffframe",
-  "version": "0.0.0-4",
+  "version": "0.0.0-5",
   "description": "social pj",
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js"
   },
- "domains": [
+  "domains": [
     "ffframe.com",
     "www.ffframe.com"
   ],

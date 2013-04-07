@@ -1,16 +1,92 @@
-var s3Upload = require('../util/images/upload_to_s3');
+var s3Upload    = require('../util/images/upload_to_s3');
 
-module.exports = {
-  find: find,
-  create: create
+function getRecent(req, res) {
+  global.models.frame.find({}, function(err, d) {
+    if (err) {
+      res.render('home', {
+        errors: err
+      });
+    } else {
+      res.render('home', {
+        frames: d
+      });
+    }
+  });
+}
+
+function show(req, res) {
+  require('./controllers').Comments.findByFrameID(req.params.id, function(err, comments) {
+    if (err) {
+      res.render('home', {errors: err});
+    } else {
+      global.models.frame.findOne({_id: req.params.id})
+      .populate('_user')
+      .exec(function(err, d) {
+        if (err) {
+          res.render('home', {errors: err});
+        } else {
+          if (d) {
+            res.render('frames/show', {data: d, comments: comments, user: req.user});
+          } else {
+            res.redirect('/');
+          }
+        }
+      });
+    }
+  });
+}
+
+function remove(req, res) {
+  global.models.frame.findOne({_id: req.params.id})
+  .populate('_user')
+  .exec(function(err, d) {
+    if (err) {
+      res.render('/frames/'+req.body.frameID, {errors: err});
+    } else {
+      if (d._user.email == req.user.email) {
+        global.models.frame.remove({_id: req.params.id}, function(err) {
+          if (err) {
+            res.render('/frames/'+req.body.frameID, {errors: err});
+          } else {
+            res.redirect('/');
+          }
+        });
+      } else {
+        res.render('/frames/'+req.body.frameID, {errors: "you can not delete this"});
+      }
+    }
+  });
 }
 
 
-function find(query, cb) {
-  global.models.frame.find(query, cb);
+function create(req, res) {
+  req.check('title', 'frame requires a title').notEmpty();
+  validUpload = isValidUpload(req);
+
+  if (req.validationErrors() || !validUpload) {
+    if (!validUpload) {
+      res.render('frames/new', {errors: "a valid image is required"});
+    } else {
+      res.render('frames/new', {errors: req.validationErrors()});
+    }
+  } else {
+    uploadToS3({
+      title: req.body.title,
+      caption: req.body.caption,
+      upload: req.files.image,
+      _user: req.user
+    }, function(err, obj) {
+      if (err) {
+        res.render('frames/new', {errors: err});
+      } else {
+        res.redirect('/');
+      }
+    });
+  }
 }
 
-function create(obj, cb) {
+
+function uploadToS3(obj, cb) {
   s3Upload({
     path: obj.upload.path,
     fileName: encodeURIComponent(obj.upload.name)
@@ -23,4 +99,16 @@ function create(obj, cb) {
       frame.save(cb)
     }
   });
+}
+
+function isValidUpload(req) {
+  var validType = ~["image/png", "image/jpg", "image/jpeg"].indexOf(req.files.image.type);
+  return Boolean(validType);
+}
+
+module.exports = {
+  getRecent: getRecent,
+  create: create,
+  remove: remove,
+  show: show
 }

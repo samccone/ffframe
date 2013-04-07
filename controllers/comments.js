@@ -1,4 +1,5 @@
-var mongoose = require('mongoose');
+var mongoose    = require('mongoose');
+var sanitize    = require('validator').sanitize;
 
 function findByFrameID(id, cb) {
   global.models.Comment.find({
@@ -8,9 +9,27 @@ function findByFrameID(id, cb) {
   .exec(cb);
 }
 
-function create(obj, cb) {
-  var comment = new global.models.Comment(obj);
-  comment.save(cb)
+function create(req, res) {
+  req.check('comment', "comment can not be blank").notEmpty();
+  req.sanitize('comment').escape();
+
+  if (req.validationErrors()) {
+    res.render('/frames/'+req.body.frameID, {errors: req.validationErrors()});
+  } else {
+    var comment = new global.models.Comment({
+      text: req.body.comment,
+      _frame: req.body.frameID,
+      _user: req.user
+    });
+
+    comment.save(function(err, model) {
+      if (err) {
+        res.render('/frames/'+req.body.frameID, {errors: err});
+      } else {
+        res.redirect('/frames/'+req.body.frameID);
+      }
+    });
+  }
 }
 
 module.exports = {
