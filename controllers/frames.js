@@ -4,11 +4,13 @@ function getRecent(req, res) {
   global.models.frame.find({}, function(err, d) {
     if (err) {
       res.render('home', {
-        errors: err
+        errors: err,
+        production: Boolean(process.env['NODE_ENV'])
       });
     } else {
       res.render('home', {
-        frames: d
+        frames: d,
+        production: Boolean(process.env['NODE_ENV'])
       });
     }
   });
@@ -17,16 +19,16 @@ function getRecent(req, res) {
 function show(req, res) {
   require('./controllers').Comments.findByFrameID(req.params.id, function(err, comments) {
     if (err) {
-      res.render('home', {errors: err});
+      res.render('home', {errors: err, production: Boolean(process.env['NODE_ENV'])});
     } else {
       global.models.frame.findOne({_id: req.params.id})
       .populate('_user')
       .exec(function(err, d) {
         if (err) {
-          res.render('home', {errors: err});
+          res.render('home', {errors: err, production: Boolean(process.env['NODE_ENV'])});
         } else {
           if (d) {
-            res.render('frames/show', {data: d, comments: comments, user: req.user});
+            res.render('frames/show', {data: d, comments: comments, user: req.user, production: Boolean(process.env['NODE_ENV'])});
           } else {
             res.redirect('/');
           }
@@ -41,18 +43,18 @@ function remove(req, res) {
   .populate('_user')
   .exec(function(err, d) {
     if (err) {
-      res.render('/frames/'+req.body.frameID, {errors: err});
+      res.render('/frames/'+req.body.frameID, {errors: err, production: Boolean(process.env['NODE_ENV'])});
     } else {
       if (d._user.email == req.user.email) {
         global.models.frame.remove({_id: req.params.id}, function(err) {
           if (err) {
-            res.render('/frames/'+req.body.frameID, {errors: err});
+            res.render('/frames/'+req.body.frameID, {errors: err, production: Boolean(process.env['NODE_ENV'])});
           } else {
             res.redirect('/');
           }
         });
       } else {
-        res.render('/frames/'+req.body.frameID, {errors: "you can not delete this"});
+        res.render('/frames/'+req.body.frameID, {errors: "you can not delete this", production: Boolean(process.env['NODE_ENV'])});
       }
     }
   });
@@ -65,9 +67,9 @@ function create(req, res) {
 
   if (req.validationErrors() || !validUpload) {
     if (!validUpload) {
-      res.render('frames/new', {errors: "a valid image is required"});
+      res.render('frames/new', {errors: "a valid image is required", production: Boolean(process.env['NODE_ENV'])});
     } else {
-      res.render('frames/new', {errors: req.validationErrors()});
+      res.render('frames/new', {errors: req.validationErrors(), production: Boolean(process.env['NODE_ENV'])});
     }
   } else {
     uploadToS3({
@@ -77,7 +79,7 @@ function create(req, res) {
       _user: req.user
     }, function(err, obj) {
       if (err) {
-        res.render('frames/new', {errors: err});
+        res.render('frames/new', {errors: err, production: Boolean(process.env['NODE_ENV'])});
       } else {
         res.redirect('/');
       }

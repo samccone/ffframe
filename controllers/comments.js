@@ -14,7 +14,7 @@ function create(req, res) {
   req.sanitize('comment').escape();
 
   if (req.validationErrors()) {
-    res.render('/frames/'+req.body.frameID, {errors: req.validationErrors()});
+    res.render('/frames/'+req.body.frameID, {errors: req.validationErrors(), production: Boolean(process.env['NODE_ENV'])});
   } else {
     var comment = new global.models.Comment({
       text: req.body.comment,
@@ -24,7 +24,7 @@ function create(req, res) {
 
     comment.save(function(err, model) {
       if (err) {
-        res.render('/frames/'+req.body.frameID, {errors: err});
+        res.render('/frames/'+req.body.frameID, {errors: err, production: Boolean(process.env['NODE_ENV'])});
       } else {
         res.redirect('/frames/'+req.body.frameID);
       }

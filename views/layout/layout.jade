@@ -8,5 +8,7 @@ html
       div(style="background: rgb(255, 205, 205); padding: 5px;")
         h2 Error Submitting
         pre.errors= JSON.stringify(errors, null, 4)
-    a(href="/") home
+    a(href="/") ffframe
     block body
+    - if (production)
+      include ../_ga.html
