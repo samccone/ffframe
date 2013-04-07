@@ -1,7 +1,7 @@
 var port            = process.env['port'] || 3000;
 var GoogleStrategy  = require('passport-google').Strategy;
 var controllers     = require('../../controllers/controllers')
-var root            = process.env['NODE_ENV'] ? "http://ffframe.jit.su"  : "http://localhost:"+port
+var root            = process.env['NODE_ENV'] ? "http://ffframe.com"  : "http://localhost:"+port
 var async           = require('async');
 
 module.exports = function(passport) {
